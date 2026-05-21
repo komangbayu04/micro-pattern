@@ -10,9 +10,8 @@ const FEATURES = [
   {
     id: 'imagery',
     label: 'Imagery',
-    description: 'AI image generation',
+    description: 'Mosaic & pixel art',
     icon: ImageryIcon,
-    comingSoon: true,
   },
 ]
 
