@@ -37,7 +37,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     ctx.translate(-centerX, -centerY)
 
     const effectiveFreePath = config.shape === 'Free' ? freePath : []
-    const pixels = generatePattern({ ...config, freePath: effectiveFreePath })
+    const pixels = generatePattern({ ...config, width, height, freePath: effectiveFreePath })
     onPixelsGenerated(pixels)
 
     ctx.fillStyle = config.pixelColor
