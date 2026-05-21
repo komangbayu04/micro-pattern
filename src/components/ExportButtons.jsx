@@ -1,10 +1,10 @@
 import React from 'react'
 import { exportPNG, exportSVG } from '../lib/export.js'
 
-export default function ExportButtons({ pixels, config }) {
+export default function ExportButtons({ pixels, config, imageConfig, imgRef }) {
   const handlePNG = () => {
     if (!pixels || pixels.length === 0) return
-    exportPNG(pixels, config)
+    exportPNG(pixels, config, imageConfig, imgRef?.current || null)
   }
 
   const handleSVG = () => {
@@ -15,12 +15,10 @@ export default function ExportButtons({ pixels, config }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <button className="btn-primary" onClick={handlePNG}>
-        <DownloadIcon />
-        Download PNG
+        <DownloadIcon /> Download PNG
       </button>
       <button className="btn-tertiary" onClick={handleSVG}>
-        <DownloadIcon />
-        Download SVG
+        <DownloadIcon /> Download SVG
       </button>
     </div>
   )

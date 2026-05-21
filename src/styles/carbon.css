@@ -1,21 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
 :root {
-  --color-canvas: #ffffff;
-  --color-surface-1: #f4f4f4;
-  --color-surface-2: #e0e0e0;
-  --color-hairline: #e0e0e0;
-  --color-hairline-strong: #161616;
-  --color-ink: #161616;
-  --color-ink-muted: #525252;
+  /* Dark mode Carbon tokens */
+  --color-canvas: #161616;
+  --color-surface-1: #262626;
+  --color-surface-2: #393939;
+  --color-surface-3: #525252;
+  --color-hairline: #393939;
+  --color-hairline-strong: #6f6f6f;
+  --color-ink: #f4f4f4;
+  --color-ink-muted: #c6c6c6;
   --color-ink-subtle: #8c8c8c;
-  --color-primary: #0f62fe;
-  --color-primary-hover: #0353e9;
-  --color-primary-pressed: #002d9c;
+  --color-primary: #4589ff;
+  --color-primary-hover: #0f62fe;
+  --color-primary-pressed: #0043ce;
   --color-on-primary: #ffffff;
-  --color-inverse-canvas: #161616;
-  --color-inverse-ink: #ffffff;
-  --color-inverse-ink-muted: #c6c6c6;
+  --color-inverse-canvas: #f4f4f4;
+  --color-inverse-ink: #161616;
+  --color-inverse-ink-muted: #525252;
+  --color-danger: #ff8389;
+
   --font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-display: 300;
   --font-body: 400;
@@ -56,22 +60,16 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-surface-1);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-surface-2);
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-surface-1); }
+::-webkit-scrollbar-thumb { background: var(--color-surface-2); }
 
-/* Typography helpers */
+/* Typography */
 .eyebrow {
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: var(--letter-spacing-caption);
-  color: var(--color-ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.64px;
+  color: var(--color-ink-subtle);
   text-transform: uppercase;
 }
 
@@ -82,7 +80,7 @@ body {
   color: var(--color-ink-muted);
 }
 
-/* Button base */
+/* Buttons */
 button {
   font-family: var(--font-family);
   font-size: 14px;
@@ -98,13 +96,11 @@ button {
   gap: var(--space-xs);
   white-space: nowrap;
 }
-
 button:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 0;
 }
 
-/* Primary button */
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
@@ -114,36 +110,39 @@ button:focus-visible {
 .btn-primary:hover { background: var(--color-primary-hover); }
 .btn-primary:active { background: var(--color-primary-pressed); }
 
-/* Secondary button */
 .btn-secondary {
-  background: var(--color-ink);
-  color: var(--color-inverse-ink);
+  background: var(--color-surface-2);
+  color: var(--color-ink);
   width: 100%;
   justify-content: center;
 }
-.btn-secondary:hover { background: #2d2d2d; }
-.btn-secondary:active { background: #0a0a0a; }
+.btn-secondary:hover { background: var(--color-surface-3); }
 
-/* Tertiary button */
 .btn-tertiary {
-  background: var(--color-canvas);
+  background: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   width: 100%;
   justify-content: center;
 }
-.btn-tertiary:hover { background: #e8f1ff; }
-.btn-tertiary:active { background: #d0e2ff; }
+.btn-tertiary:hover { background: rgba(69, 137, 255, 0.1); }
 
-/* Ghost button */
 .btn-ghost {
   background: transparent;
   color: var(--color-primary);
   width: 100%;
   justify-content: center;
 }
-.btn-ghost:hover { background: #e8f1ff; }
-.btn-ghost:active { background: #d0e2ff; }
+.btn-ghost:hover { background: rgba(69, 137, 255, 0.1); }
+
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  width: 100%;
+  justify-content: center;
+}
+.btn-danger-ghost:hover { background: rgba(255, 131, 137, 0.1); }
 
 /* Inputs */
 input[type="number"],
@@ -152,10 +151,10 @@ input[type="text"] {
   font-size: 14px;
   font-weight: var(--font-body);
   letter-spacing: var(--letter-spacing-body);
-  background: var(--color-surface-1);
+  background: var(--color-surface-2);
   color: var(--color-ink);
   border: none;
-  border-bottom: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius);
   padding: 6px var(--space-xs);
   width: 100%;
@@ -164,14 +163,15 @@ input[type="text"] {
 input[type="number"]:focus,
 input[type="text"]:focus {
   border-bottom: 2px solid var(--color-primary);
+  background: var(--color-surface-3);
 }
 
-/* Range input */
+/* Range */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
+  height: 2px;
   background: var(--color-surface-2);
   border-radius: var(--radius);
   outline: none;
@@ -180,36 +180,31 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--color-primary);
   cursor: pointer;
-  border: 2px solid var(--color-canvas);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border: 2px solid var(--color-surface-1);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--color-primary);
   cursor: pointer;
-  border: 2px solid var(--color-canvas);
-}
-input[type="range"]:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  border: 2px solid var(--color-surface-1);
 }
 
-/* Checkbox / Toggle */
+/* Checkbox */
 input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
-  border: 1px solid var(--color-ink-muted);
+  border: 1px solid var(--color-surface-3);
   border-radius: var(--radius);
-  background: var(--color-canvas);
+  background: var(--color-surface-2);
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
@@ -230,12 +225,8 @@ input[type="checkbox"]:checked::after {
   border-left: none;
   transform: rotate(45deg);
 }
-input[type="checkbox"]:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-}
 
-/* Hairline divider */
+/* Divider */
 .divider {
   height: 1px;
   background: var(--color-hairline);
@@ -245,10 +236,10 @@ input[type="checkbox"]:focus-visible {
 /* Checkerboard for transparent bg */
 .checkerboard {
   background-image:
-    linear-gradient(45deg, #ccc 25%, transparent 25%),
-    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ccc 75%),
-    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    linear-gradient(45deg, #3a3a3a 25%, transparent 25%),
+    linear-gradient(-45deg, #3a3a3a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #3a3a3a 75%),
+    linear-gradient(-45deg, transparent 75%, #3a3a3a 75%);
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
 }

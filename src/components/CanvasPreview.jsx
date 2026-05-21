@@ -1,11 +1,75 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { generatePattern } from '../lib/pattern.js'
 
-export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, onFreePathChange }) {
+const FIT_MAP = {
+  Cover: 'cover',
+  Contain: 'contain',
+  Fill: 'fill',
+  Tile: 'tile',
+}
+
+const BLEND_MAP = {
+  Normal: 'source-over',
+  Multiply: 'multiply',
+  Screen: 'screen',
+  Overlay: 'overlay',
+  'Soft Light': 'soft-light',
+}
+
+function drawImage(ctx, img, width, height, fit) {
+  if (fit === 'Tile') {
+    const pattern = ctx.createPattern(img, 'repeat')
+    ctx.fillStyle = pattern
+    ctx.fillRect(0, 0, width, height)
+    return
+  }
+
+  const iw = img.naturalWidth
+  const ih = img.naturalHeight
+  const canvasAspect = width / height
+  const imgAspect = iw / ih
+  let sx = 0, sy = 0, sw = iw, sh = ih
+  let dx = 0, dy = 0, dw = width, dh = height
+
+  if (fit === 'Cover') {
+    if (imgAspect > canvasAspect) {
+      sw = ih * canvasAspect
+      sx = (iw - sw) / 2
+    } else {
+      sh = iw / canvasAspect
+      sy = (ih - sh) / 2
+    }
+  } else if (fit === 'Contain') {
+    if (imgAspect > canvasAspect) {
+      dh = width / imgAspect
+      dy = (height - dh) / 2
+    } else {
+      dw = height * imgAspect
+      dx = (width - dw) / 2
+    }
+  }
+  // Fill: stretch, use default dx/dy/dw/dh
+
+  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+}
+
+export default function CanvasPreview({ config, imageConfig, onPixelsGenerated, canvasRef, onFreePathChange }) {
   const [isDragging, setIsDragging] = useState(false)
   const [freePath, setFreePath] = useState([])
   const [drawingPath, setDrawingPath] = useState([])
   const lastPointRef = useRef(null)
+  const imgRef = useRef(null)
+
+  // Load reference image
+  useEffect(() => {
+    if (!imageConfig.src) {
+      imgRef.current = null
+      return
+    }
+    const img = new Image()
+    img.onload = () => { imgRef.current = img }
+    img.src = imageConfig.src
+  }, [imageConfig.src])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -14,7 +78,6 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     const { canvasWidth: width, canvasHeight: height } = config
     const dpr = Math.min(window.devicePixelRatio || 1, 3)
 
-    // Render at DPR × logical size for crisp output on all screens
     canvas.width = Math.round(width * dpr)
     canvas.height = Math.round(height * dpr)
 
@@ -22,7 +85,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     ctx.imageSmoothingEnabled = false
     ctx.scale(dpr, dpr)
 
-    // Fill background
+    // 1 — Background color
     if (config.backgroundColor === 'transparent') {
       ctx.clearRect(0, 0, width, height)
     } else {
@@ -30,7 +93,18 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
       ctx.fillRect(0, 0, width, height)
     }
 
-    // Apply rotation
+    // 2 — Reference image layer
+    if (imgRef.current) {
+      ctx.save()
+      ctx.globalAlpha = imageConfig.opacity
+      ctx.globalCompositeOperation = BLEND_MAP[imageConfig.blend] || 'source-over'
+      ctx.imageSmoothingEnabled = true
+      drawImage(ctx, imgRef.current, width, height, imageConfig.fit)
+      ctx.restore()
+      ctx.imageSmoothingEnabled = false
+    }
+
+    // 3 — Pixel pattern layer
     const centerX = width / 2
     const centerY = height / 2
     ctx.save()
@@ -44,11 +118,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
 
     ctx.fillStyle = config.pixelColor
     for (const p of pixels) {
-      // Round all coords to integers — eliminates sub-pixel anti-aliasing
-      const x = Math.round(p.x - p.size / 2)
-      const y = Math.round(p.y - p.size / 2)
-      const s = Math.round(p.size)
-      ctx.fillRect(x, y, s, s)
+      ctx.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), Math.round(p.size), Math.round(p.size))
     }
 
     ctx.restore()
@@ -56,18 +126,16 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     // Free-draw guide path
     if (config.shape === 'Free' && drawingPath.length > 1) {
       ctx.save()
-      ctx.strokeStyle = '#e0e0e0'
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'
       ctx.setLineDash([4, 4])
       ctx.lineWidth = 1.5
       ctx.beginPath()
       ctx.moveTo(drawingPath[0].x, drawingPath[0].y)
-      for (let i = 1; i < drawingPath.length; i++) {
-        ctx.lineTo(drawingPath[i].x, drawingPath[i].y)
-      }
+      for (let i = 1; i < drawingPath.length; i++) ctx.lineTo(drawingPath[i].x, drawingPath[i].y)
       ctx.stroke()
       ctx.restore()
     }
-  }, [config, freePath, drawingPath])
+  }, [config, imageConfig, freePath, drawingPath])
 
   const getCanvasPoint = useCallback((e) => {
     const canvas = canvasRef.current
@@ -88,10 +156,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     e.preventDefault()
     setIsDragging(true)
     const pt = getCanvasPoint(e)
-    if (pt) {
-      setDrawingPath([pt])
-      lastPointRef.current = pt
-    }
+    if (pt) { setDrawingPath([pt]); lastPointRef.current = pt }
   }, [config.shape, getCanvasPoint])
 
   const handleMouseMove = useCallback((e) => {
@@ -101,8 +166,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     if (!pt) return
     const last = lastPointRef.current
     if (last) {
-      const dx = pt.x - last.x
-      const dy = pt.y - last.y
+      const dx = pt.x - last.x, dy = pt.y - last.y
       if (Math.sqrt(dx * dx + dy * dy) >= 8) {
         setDrawingPath(prev => [...prev, pt])
         lastPointRef.current = pt
@@ -119,13 +183,6 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     lastPointRef.current = null
   }, [isDragging, config.shape, drawingPath, onFreePathChange])
 
-  const handleRedraw = () => {
-    setFreePath([])
-    setDrawingPath([])
-    onFreePathChange([])
-    lastPointRef.current = null
-  }
-
   const isTransparent = config.backgroundColor === 'transparent'
 
   return (
@@ -135,7 +192,7 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--color-canvas)',
+      background: '#0d0d0d',
       padding: 'var(--space-lg)',
       gap: 'var(--space-md)',
       overflow: 'hidden',
@@ -160,36 +217,27 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
           className={isTransparent ? 'checkerboard' : ''}
           style={{
             display: 'block',
-            // CSS display size stays at logical resolution — DPR is in the buffer
             width: config.canvasWidth + 'px',
             height: config.canvasHeight + 'px',
             maxWidth: '100%',
             maxHeight: 'calc(100vh - 160px)',
-            border: '1px solid var(--color-hairline)',
+            border: '1px solid #393939',
             cursor: config.shape === 'Free' ? 'crosshair' : 'default',
-            // Nearest-neighbor scaling — no blur when CSS shrinks the canvas
             imageRendering: 'pixelated',
-            imageRendering: 'crisp-edges',
           }}
         />
       </div>
 
       {config.shape === 'Free' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-          <span className="caption" style={{ textAlign: 'center' }}>
-            Click and drag on the canvas to draw a path
-          </span>
+          <span className="caption">Click and drag on the canvas to draw a path</span>
           {freePath.length > 0 && (
             <button
-              onClick={handleRedraw}
+              onClick={() => { setFreePath([]); setDrawingPath([]); onFreePathChange([]); lastPointRef.current = null }}
               style={{
-                background: 'transparent',
-                color: 'var(--color-primary)',
+                background: 'transparent', color: 'var(--color-primary)',
                 border: '1px solid var(--color-primary)',
-                borderRadius: '0px',
-                padding: '6px 16px',
-                fontSize: '12px',
-                cursor: 'pointer',
+                borderRadius: '0px', padding: '6px 16px', fontSize: '12px', cursor: 'pointer',
               }}
             >
               Clear path & redraw

@@ -31,7 +31,7 @@ function Section({ title, children }) {
   )
 }
 
-export default function ControlPanel({ config, onConfigChange, canvasRef, pixels, onRandomize, onReset }) {
+export default function ControlPanel({ config, onConfigChange, pixels, imageConfig, imgRef, onRandomize, onReset }) {
   const set = (key) => (val) => onConfigChange({ [key]: val })
 
   const handleAspectWidth = (w) => {
@@ -274,6 +274,8 @@ export default function ControlPanel({ config, onConfigChange, canvasRef, pixels
             backgroundColor: config.backgroundColor,
             rotation: config.rotation,
           }}
+          imageConfig={imageConfig}
+          imgRef={imgRef}
         />
       </div>
     </div>
