@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+:root {
+  --color-canvas: #ffffff;
+  --color-surface-1: #f4f4f4;
+  --color-surface-2: #e0e0e0;
+  --color-hairline: #e0e0e0;
+  --color-hairline-strong: #161616;
+  --color-ink: #161616;
+  --color-ink-muted: #525252;
+  --color-ink-subtle: #8c8c8c;
+  --color-primary: #0f62fe;
+  --color-primary-hover: #0353e9;
+  --color-primary-pressed: #002d9c;
+  --color-on-primary: #ffffff;
+  --color-inverse-canvas: #161616;
+  --color-inverse-ink: #ffffff;
+  --color-inverse-ink-muted: #c6c6c6;
+  --font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 300;
+  --font-body: 400;
+  --font-emphasis: 600;
+  --letter-spacing-body: 0.16px;
+  --letter-spacing-caption: 0.32px;
+  --radius: 0px;
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  font-weight: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: var(--letter-spacing-body);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+}
+
+/* Typography helpers */
+.eyebrow {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: var(--letter-spacing-caption);
+  color: var(--color-ink-muted);
+  text-transform: uppercase;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: var(--letter-spacing-caption);
+  color: var(--color-ink-muted);
+}
+
+/* Button base */
+button {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: var(--font-body);
+  letter-spacing: var(--letter-spacing-body);
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  padding: 10px var(--space-md);
+  transition: background 80ms ease, color 80ms ease, border-color 80ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 0;
+}
+
+/* Primary button */
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  width: 100%;
+  justify-content: center;
+}
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-primary:active { background: var(--color-primary-pressed); }
+
+/* Secondary button */
+.btn-secondary {
+  background: var(--color-ink);
+  color: var(--color-inverse-ink);
+  width: 100%;
+  justify-content: center;
+}
+.btn-secondary:hover { background: #2d2d2d; }
+.btn-secondary:active { background: #0a0a0a; }
+
+/* Tertiary button */
+.btn-tertiary {
+  background: var(--color-canvas);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  width: 100%;
+  justify-content: center;
+}
+.btn-tertiary:hover { background: #e8f1ff; }
+.btn-tertiary:active { background: #d0e2ff; }
+
+/* Ghost button */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-primary);
+  width: 100%;
+  justify-content: center;
+}
+.btn-ghost:hover { background: #e8f1ff; }
+.btn-ghost:active { background: #d0e2ff; }
+
+/* Inputs */
+input[type="number"],
+input[type="text"] {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: var(--font-body);
+  letter-spacing: var(--letter-spacing-body);
+  background: var(--color-surface-1);
+  color: var(--color-ink);
+  border: none;
+  border-bottom: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+  padding: 6px var(--space-xs);
+  width: 100%;
+  outline: none;
+}
+input[type="number"]:focus,
+input[type="text"]:focus {
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* Range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-canvas);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-canvas);
+}
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Checkbox / Toggle */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-ink-muted);
+  border-radius: var(--radius);
+  background: var(--color-canvas);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+input[type="checkbox"]:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* Hairline divider */
+.divider {
+  height: 1px;
+  background: var(--color-hairline);
+  width: 100%;
+}
+
+/* Checkerboard for transparent bg */
+.checkerboard {
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
