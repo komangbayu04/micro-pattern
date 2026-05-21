@@ -266,13 +266,13 @@ export default function ControlPanel({ config, onConfigChange, canvasRef, pixels
         </div>
         <div className="divider" />
         <ExportButtons
-          canvasRef={canvasRef}
           pixels={pixels}
           config={{
             width: config.canvasWidth,
             height: config.canvasHeight,
             pixelColor: config.pixelColor,
             backgroundColor: config.backgroundColor,
+            rotation: config.rotation,
           }}
         />
       </div>

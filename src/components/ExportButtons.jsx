@@ -1,10 +1,10 @@
 import React from 'react'
 import { exportPNG, exportSVG } from '../lib/export.js'
 
-export default function ExportButtons({ canvasRef, pixels, config }) {
+export default function ExportButtons({ pixels, config }) {
   const handlePNG = () => {
-    if (!canvasRef.current) return
-    exportPNG(canvasRef.current)
+    if (!pixels || pixels.length === 0) return
+    exportPNG(pixels, config)
   }
 
   const handleSVG = () => {

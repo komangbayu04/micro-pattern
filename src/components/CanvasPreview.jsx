@@ -2,23 +2,25 @@ import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { generatePattern } from '../lib/pattern.js'
 
 export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, onFreePathChange }) {
-  const containerRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
   const [freePath, setFreePath] = useState([])
   const [drawingPath, setDrawingPath] = useState([])
   const lastPointRef = useRef(null)
 
-  // Render pattern
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
     const { canvasWidth: width, canvasHeight: height } = config
+    const dpr = Math.min(window.devicePixelRatio || 1, 3)
 
-    canvas.width = width
-    canvas.height = height
+    // Render at DPR × logical size for crisp output on all screens
+    canvas.width = Math.round(width * dpr)
+    canvas.height = Math.round(height * dpr)
 
     const ctx = canvas.getContext('2d')
+    ctx.imageSmoothingEnabled = false
+    ctx.scale(dpr, dpr)
 
     // Fill background
     if (config.backgroundColor === 'transparent') {
@@ -42,13 +44,16 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
 
     ctx.fillStyle = config.pixelColor
     for (const p of pixels) {
-      const half = p.size / 2
-      ctx.fillRect(p.x - half, p.y - half, p.size, p.size)
+      // Round all coords to integers — eliminates sub-pixel anti-aliasing
+      const x = Math.round(p.x - p.size / 2)
+      const y = Math.round(p.y - p.size / 2)
+      const s = Math.round(p.size)
+      ctx.fillRect(x, y, s, s)
     }
 
     ctx.restore()
 
-    // Draw free-draw path while dragging
+    // Free-draw guide path
     if (config.shape === 'Free' && drawingPath.length > 1) {
       ctx.save()
       ctx.strokeStyle = '#e0e0e0'
@@ -64,7 +69,6 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
     }
   }, [config, freePath, drawingPath])
 
-  // Convert mouse/touch event to canvas coordinates
   const getCanvasPoint = useCallback((e) => {
     const canvas = canvasRef.current
     if (!canvas) return null
@@ -136,16 +140,14 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
       gap: 'var(--space-md)',
       overflow: 'hidden',
     }}>
-      <div
-        style={{
-          position: 'relative',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{
+        position: 'relative',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
@@ -158,12 +160,16 @@ export default function CanvasPreview({ config, onPixelsGenerated, canvasRef, on
           className={isTransparent ? 'checkerboard' : ''}
           style={{
             display: 'block',
+            // CSS display size stays at logical resolution — DPR is in the buffer
+            width: config.canvasWidth + 'px',
+            height: config.canvasHeight + 'px',
             maxWidth: '100%',
             maxHeight: 'calc(100vh - 160px)',
-            height: 'auto',
             border: '1px solid var(--color-hairline)',
             cursor: config.shape === 'Free' ? 'crosshair' : 'default',
+            // Nearest-neighbor scaling — no blur when CSS shrinks the canvas
             imageRendering: 'pixelated',
+            imageRendering: 'crisp-edges',
           }}
         />
       </div>
