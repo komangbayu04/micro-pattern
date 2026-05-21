@@ -223,7 +223,9 @@ export default function CanvasPreview({ config, imageConfig, onPixelsGenerated, 
             maxHeight: 'calc(100vh - 160px)',
             border: '1px solid #393939',
             cursor: config.shape === 'Free' ? 'crosshair' : 'default',
-            imageRendering: 'pixelated',
+            // bilinear scaling for display — eliminates white gap artifacts
+            // from nearest-neighbor at non-integer scale factors
+            imageRendering: 'auto',
           }}
         />
       </div>
