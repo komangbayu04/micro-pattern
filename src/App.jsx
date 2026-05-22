@@ -4,6 +4,7 @@ import CanvasPreview from './components/CanvasPreview.jsx'
 import FeatureSidebar from './components/FeatureSidebar.jsx'
 import ImageryView from './components/ImageryView.jsx'
 import ImageryControls from './components/ImageryControls.jsx'
+import AiTribeControls from './components/AiTribeControls.jsx'
 import { randomSeed } from './lib/prng.js'
 import { MOSAIC_DEFAULTS } from './lib/mosaic.js'
 
@@ -11,6 +12,11 @@ const DEFAULT_IMAGE_CONFIG = { src: null, name: null, opacity: 1.0, fit: 'Cover'
 
 function getInitialConfig() {
   return { ...DEFAULTS, seed: randomSeed(), aspectLock: false }
+}
+
+const FEATURE_LABELS = {
+  'pixel-pattern': 'Pixel Pattern Generator',
+  'imagery': 'Imagery',
 }
 
 export default function App() {
@@ -27,6 +33,10 @@ export default function App() {
   const [imageryConfig, setImageryConfig] = useState(MOSAIC_DEFAULTS)
   const imageryCanvasRef = useRef(null)
 
+  // Imagery tool mode: 'mosaic' | 'ai-tribe'
+  const [imageryTool, setImageryTool] = useState('mosaic')
+  const [aiResult, setAiResult] = useState(null)
+
   // Pixel Pattern handlers
   const handleConfigChange = useCallback(u => setConfig(p => ({ ...p, ...u })), [])
   const handleRandomize = useCallback(() => setConfig(p => ({ ...p, seed: randomSeed() })), [])
@@ -35,8 +45,12 @@ export default function App() {
   const handleFreePathChange = useCallback(path => setConfig(p => ({ ...p, freePath: path })), [])
 
   // Imagery handlers
-  const handleImageryImageLoad = useCallback(img => setImageryImage(img), [])
+  const handleImageryImageLoad = useCallback(img => {
+    setImageryImage(img)
+    setAiResult(null)
+  }, [])
   const handleImageryConfigChange = useCallback(c => setImageryConfig(c), [])
+  const handleAiResult = useCallback(img => setAiResult(img), [])
 
   return (
     <div style={{
@@ -55,7 +69,7 @@ export default function App() {
         <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-ink)', letterSpacing: '0.32px' }}>Tribe</span>
         <span style={{ fontSize: '14px', color: 'var(--color-surface-3)' }}>—</span>
         <span style={{ fontSize: '14px', color: 'var(--color-ink-muted)', letterSpacing: '0.16px' }}>
-          {activeFeature === 'pixel-pattern' ? 'Pixel Pattern Generator' : 'Imagery'}
+          {FEATURE_LABELS[activeFeature] ?? activeFeature}
         </span>
       </div>
 
@@ -94,13 +108,24 @@ export default function App() {
               config={imageryConfig}
               canvasRef={imageryCanvasRef}
               onImageLoad={handleImageryImageLoad}
+              activeTool={imageryTool}
+              onToolChange={setImageryTool}
+              aiResult={aiResult}
             />
-            <ImageryControls
-              config={imageryConfig}
-              onConfigChange={handleImageryConfigChange}
-              canvasRef={imageryCanvasRef}
-              hasImage={!!imageryImage}
-            />
+            {imageryTool === 'mosaic' && (
+              <ImageryControls
+                config={imageryConfig}
+                onConfigChange={handleImageryConfigChange}
+                canvasRef={imageryCanvasRef}
+                hasImage={!!imageryImage}
+              />
+            )}
+            {imageryTool === 'ai-tribe' && (
+              <AiTribeControls
+                personImage={imageryImage}
+                onResultReady={handleAiResult}
+              />
+            )}
           </>
         )}
       </div>
