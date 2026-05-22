@@ -121,6 +121,7 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
       flexDirection: 'column',
       background: '#0d0d0d',
       overflow: 'hidden',
+      position: 'relative', // anchor for floating toolbar
     }}>
       {/* Top toolbar */}
       <div style={{
@@ -132,6 +133,8 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
         alignItems: 'center',
         padding: '0 12px',
         gap: '8px',
+        zIndex: 20,
+        position: 'relative',
       }}>
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -194,67 +197,15 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
         />
       </div>
 
-      {/* Canvas area */}
+      {/* Canvas area — no position:relative so floating bar isn't clipped here */}
       <div style={{
         flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: '72px 24px 24px', // top padding so canvas clears the floating toolbar
         overflow: 'hidden',
-        position: 'relative',
       }}>
-
-        {/* Floating toolbar — Figma style */}
-        <div style={{
-          position: 'absolute',
-          top: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'var(--color-surface-1)',
-          border: '1px solid var(--color-hairline)',
-          display: 'flex',
-          alignItems: 'stretch',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
-          zIndex: 10,
-        }}>
-          {TOOLS.map((tool, i) => {
-            const active = activeTool === tool.id
-            const Icon = tool.icon
-            return (
-              <React.Fragment key={tool.id}>
-                {i > 0 && (
-                  <div style={{ width: '1px', background: 'var(--color-hairline)', alignSelf: 'stretch' }} />
-                )}
-                <button
-                  onClick={() => onToolChange(tool.id)}
-                  title={tool.label}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '8px 18px',
-                    background: active ? 'var(--color-primary)' : 'transparent',
-                    color: active ? 'white' : 'var(--color-ink-subtle)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'background 80ms, color 80ms',
-                    minWidth: '64px',
-                  }}
-                  onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'var(--color-surface-2)'; e.currentTarget.style.color = 'var(--color-ink)' } }}
-                  onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--color-ink-subtle)' } }}
-                >
-                  <Icon active={active} />
-                  <span style={{ fontSize: '10px', letterSpacing: '0.3px', fontWeight: active ? 600 : 400, whiteSpace: 'nowrap' }}>
-                    {tool.label}
-                  </span>
-                </button>
-              </React.Fragment>
-            )
-          })}
-        </div>
-
         {/* Original image preview (mosaic mode only) */}
         {showOriginal && activeTool === 'mosaic' && image && (
           <img
@@ -262,7 +213,7 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
             alt="Original"
             style={{
               maxWidth: '100%',
-              maxHeight: 'calc(100vh - 160px)',
+              maxHeight: 'calc(100vh - 180px)',
               border: '1px solid #393939',
               display: 'block',
             }}
@@ -275,45 +226,98 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
           style={{
             display: (showOriginal && activeTool === 'mosaic') ? 'none' : 'block',
             maxWidth: '100%',
-            maxHeight: 'calc(100vh - 160px)',
+            maxHeight: 'calc(100vh - 180px)',
             border: '1px solid #393939',
             imageRendering: 'auto',
           }}
         />
-
-        {/* AI Tribe hint overlay when no result yet */}
-        {activeTool === 'ai-tribe' && !aiResult && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(13,13,13,0.72)',
-            pointerEvents: 'none',
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-              <SparkleIcon size={28} active={false} />
-              <span style={{ fontSize: '13px', color: 'var(--color-ink-subtle)' }}>
-                Set up AI Tribe in the panel →
-              </span>
-            </div>
-          </div>
-        )}
-
-        {isProcessing && !showOriginal && activeTool === 'mosaic' && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(13,13,13,0.55)',
-          }}>
-            <span style={{ fontSize: '13px', color: 'var(--color-ink-muted)' }}>Generating mosaic…</span>
-          </div>
-        )}
       </div>
+
+      {/* Floating toolbar — anchored to outer div, above overflow:hidden canvas area */}
+      <div style={{
+        position: 'absolute',
+        top: '56px', // 40px top bar + 16px gap
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'var(--color-surface-1)',
+        border: '1px solid var(--color-hairline)',
+        display: 'flex',
+        alignItems: 'stretch',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.55)',
+        zIndex: 30,
+      }}>
+        {TOOLS.map((tool, i) => {
+          const active = activeTool === tool.id
+          const Icon = tool.icon
+          return (
+            <React.Fragment key={tool.id}>
+              {i > 0 && (
+                <div style={{ width: '1px', background: 'var(--color-hairline)', alignSelf: 'stretch' }} />
+              )}
+              <button
+                onClick={() => onToolChange(tool.id)}
+                title={tool.label}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '9px 20px',
+                  background: active ? 'var(--color-primary)' : 'transparent',
+                  color: active ? 'white' : 'var(--color-ink-subtle)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 80ms, color 80ms',
+                  minWidth: '70px',
+                }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'var(--color-surface-2)'; e.currentTarget.style.color = 'var(--color-ink)' } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--color-ink-subtle)' } }}
+              >
+                <Icon active={active} />
+                <span style={{ fontSize: '10px', letterSpacing: '0.3px', fontWeight: active ? 600 : 400, whiteSpace: 'nowrap' }}>
+                  {tool.label}
+                </span>
+              </button>
+            </React.Fragment>
+          )
+        })}
+      </div>
+
+      {/* AI Tribe hint overlay */}
+      {activeTool === 'ai-tribe' && !aiResult && (
+        <div style={{
+          position: 'absolute',
+          top: '40px', bottom: 0, left: 0, right: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(13,13,13,0.6)',
+          pointerEvents: 'none',
+          zIndex: 5,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+            <SparkleIcon size={28} active={false} />
+            <span style={{ fontSize: '13px', color: 'var(--color-ink-subtle)' }}>
+              Set up AI Tribe in the panel →
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Mosaic processing overlay */}
+      {isProcessing && !showOriginal && activeTool === 'mosaic' && (
+        <div style={{
+          position: 'absolute',
+          top: '40px', bottom: 0, left: 0, right: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(13,13,13,0.55)',
+          zIndex: 5,
+        }}>
+          <span style={{ fontSize: '13px', color: 'var(--color-ink-muted)' }}>Generating mosaic…</span>
+        </div>
+      )}
     </div>
   )
 }
