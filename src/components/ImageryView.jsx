@@ -51,69 +51,6 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
 
   const handleInputChange = (e) => handleFile(e.target.files?.[0])
 
-  if (!image) {
-    return (
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#0d0d0d',
-        padding: '40px',
-      }}>
-        <div
-          onDrop={handleDrop}
-          onDragOver={e => e.preventDefault()}
-          onClick={() => fileInputRef.current?.click()}
-          style={{
-            width: '100%',
-            maxWidth: '480px',
-            aspectRatio: '16/9',
-            border: '1px dashed var(--color-primary)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            gap: '16px',
-            background: 'rgba(69,137,255,0.04)',
-            transition: 'background 120ms',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(69,137,255,0.08)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(69,137,255,0.04)'}
-        >
-          <UploadIcon />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}>
-              Upload an image
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--color-ink-subtle)' }}>
-              Drag & drop or click — PNG, JPG, WebP
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {['Bead', 'Square', 'Circle', 'Diamond'].map(s => (
-              <div key={s} style={{
-                padding: '4px 10px',
-                background: 'var(--color-surface-2)',
-                fontSize: '11px',
-                color: 'var(--color-ink-subtle)',
-                letterSpacing: '0.3px',
-              }}>{s}</div>
-            ))}
-          </div>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleInputChange}
-          style={{ display: 'none' }}
-        />
-      </div>
-    )
-  }
-
   return (
     <div style={{
       flex: 1,
@@ -121,129 +58,178 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
       flexDirection: 'column',
       background: '#0d0d0d',
       overflow: 'hidden',
-      position: 'relative', // anchor for floating toolbar
+      position: 'relative',
     }}>
-      {/* Top toolbar */}
-      <div style={{
-        height: '40px',
-        minHeight: '40px',
-        background: 'var(--color-surface-1)',
-        borderBottom: '1px solid var(--color-hairline)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 12px',
-        gap: '8px',
-        zIndex: 20,
-        position: 'relative',
-      }}>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          style={{
-            background: 'var(--color-surface-2)',
-            color: 'var(--color-ink-muted)',
-            border: '1px solid var(--color-hairline)',
-            padding: '4px 12px',
-            fontSize: '12px',
-            cursor: 'pointer',
-            borderRadius: '0px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          <UploadSmallIcon /> Replace
-        </button>
 
-        {activeTool === 'mosaic' && (
-          <>
-            <div style={{ width: '1px', height: '20px', background: 'var(--color-hairline)', margin: '0 4px' }} />
-            <div style={{ display: 'flex', border: '1px solid var(--color-hairline)' }}>
-              {['Mosaic', 'Original'].map(label => {
-                const active = label === 'Mosaic' ? !showOriginal : showOriginal
-                return (
-                  <button
-                    key={label}
-                    onClick={() => setShowOriginal(label === 'Original')}
-                    style={{
-                      padding: '4px 12px',
-                      fontSize: '12px',
-                      background: active ? 'var(--color-primary)' : 'transparent',
-                      color: active ? 'white' : 'var(--color-ink-subtle)',
-                      border: 'none',
-                      borderRadius: '0px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-          </>
-        )}
+      {/* Top bar — only when image is loaded */}
+      {image && (
+        <div style={{
+          height: '40px',
+          minHeight: '40px',
+          background: 'var(--color-surface-1)',
+          borderBottom: '1px solid var(--color-hairline)',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 12px',
+          gap: '8px',
+          position: 'relative',
+          zIndex: 20,
+        }}>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              background: 'var(--color-surface-2)',
+              color: 'var(--color-ink-muted)',
+              border: '1px solid var(--color-hairline)',
+              padding: '4px 12px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              borderRadius: '0px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <UploadSmallIcon /> Replace
+          </button>
 
-        {isProcessing && (
-          <span style={{ fontSize: '12px', color: 'var(--color-ink-subtle)', marginLeft: '8px' }}>
-            Processing…
-          </span>
-        )}
+          {activeTool === 'mosaic' && (
+            <>
+              <div style={{ width: '1px', height: '20px', background: 'var(--color-hairline)', margin: '0 4px' }} />
+              <div style={{ display: 'flex', border: '1px solid var(--color-hairline)' }}>
+                {['Mosaic', 'Original'].map(label => {
+                  const active = label === 'Mosaic' ? !showOriginal : showOriginal
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => setShowOriginal(label === 'Original')}
+                      style={{
+                        padding: '4px 12px',
+                        fontSize: '12px',
+                        background: active ? 'var(--color-primary)' : 'transparent',
+                        color: active ? 'white' : 'var(--color-ink-subtle)',
+                        border: 'none',
+                        borderRadius: '0px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleInputChange}
-          style={{ display: 'none' }}
-        />
-      </div>
+          {isProcessing && (
+            <span style={{ fontSize: '12px', color: 'var(--color-ink-subtle)', marginLeft: '8px' }}>
+              Processing…
+            </span>
+          )}
+        </div>
+      )}
 
-      {/* Canvas area — no position:relative so floating bar isn't clipped here */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleInputChange}
+        style={{ display: 'none' }}
+      />
+
+      {/* Content area */}
       <div style={{
         flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '72px 24px 24px', // top padding so canvas clears the floating toolbar
+        padding: image ? '72px 24px 24px' : '40px',
         overflow: 'hidden',
       }}>
-        {/* Original image preview (mosaic mode only) */}
-        {showOriginal && activeTool === 'mosaic' && image && (
-          <img
-            src={image.src}
-            alt="Original"
+        {!image ? (
+          /* Upload zone */
+          <div
+            onDrop={handleDrop}
+            onDragOver={e => e.preventDefault()}
+            onClick={() => fileInputRef.current?.click()}
             style={{
-              maxWidth: '100%',
-              maxHeight: 'calc(100vh - 180px)',
-              border: '1px solid #393939',
-              display: 'block',
+              width: '100%',
+              maxWidth: '480px',
+              aspectRatio: '16/9',
+              border: '1px dashed var(--color-primary)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              gap: '16px',
+              background: 'rgba(69,137,255,0.04)',
+              transition: 'background 120ms',
             }}
-          />
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(69,137,255,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(69,137,255,0.04)'}
+          >
+            <UploadIcon />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}>
+                Upload an image
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--color-ink-subtle)' }}>
+                Drag & drop or click — PNG, JPG, WebP
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['Bead', 'Square', 'Circle', 'Diamond'].map(s => (
+                <div key={s} style={{
+                  padding: '4px 10px',
+                  background: 'var(--color-surface-2)',
+                  fontSize: '11px',
+                  color: 'var(--color-ink-subtle)',
+                  letterSpacing: '0.3px',
+                }}>{s}</div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Canvas view */
+          <>
+            {showOriginal && activeTool === 'mosaic' && (
+              <img
+                src={image.src}
+                alt="Original"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: 'calc(100vh - 180px)',
+                  border: '1px solid #393939',
+                  display: 'block',
+                }}
+              />
+            )}
+            <canvas
+              ref={canvasRef}
+              style={{
+                display: (showOriginal && activeTool === 'mosaic') ? 'none' : 'block',
+                maxWidth: '100%',
+                maxHeight: 'calc(100vh - 180px)',
+                border: '1px solid #393939',
+                imageRendering: 'auto',
+              }}
+            />
+          </>
         )}
-
-        {/* Main canvas */}
-        <canvas
-          ref={canvasRef}
-          style={{
-            display: (showOriginal && activeTool === 'mosaic') ? 'none' : 'block',
-            maxWidth: '100%',
-            maxHeight: 'calc(100vh - 180px)',
-            border: '1px solid #393939',
-            imageRendering: 'auto',
-          }}
-        />
       </div>
 
-      {/* Floating toolbar — anchored to outer div, above overflow:hidden canvas area */}
+      {/* Floating toolbar — always visible, anchored to outer container */}
       <div style={{
         position: 'absolute',
-        top: '56px', // 40px top bar + 16px gap
+        top: image ? '56px' : '16px',
         left: '50%',
         transform: 'translateX(-50%)',
         background: 'var(--color-surface-1)',
         border: '1px solid var(--color-hairline)',
         display: 'flex',
         alignItems: 'stretch',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.55)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
         zIndex: 30,
       }}>
         {TOOLS.map((tool, i) => {
@@ -284,7 +270,7 @@ export default function ImageryView({ image, config, canvasRef, onImageLoad, act
       </div>
 
       {/* AI Tribe hint overlay */}
-      {activeTool === 'ai-tribe' && !aiResult && (
+      {image && activeTool === 'ai-tribe' && !aiResult && (
         <div style={{
           position: 'absolute',
           top: '40px', bottom: 0, left: 0, right: 0,
